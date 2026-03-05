@@ -1,0 +1,290 @@
+/* ── Base ─────────────────────────────────────────── */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Roboto', sans-serif;
+  background-color: #f0f2f5;
+  color: #333;
+  height: 100vh;
+  min-width: 710px;
+  min-height: 465px;
+  display: flex;
+  align-items: stretch;
+  overflow: auto;
+}
+
+/* ── Two-Column Layout ────────────────────────────── */
+.app-container {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  padding: 24px;
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+/* ── Left Panel: Document Management ─────────────── */
+#doc-panel {
+  width: 320px;
+  flex-shrink: 0;
+  background-color: #ffffff;
+  border: 1px solid #dde1ea;
+  border-radius: 12px;
+  padding: 24px 20px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.07);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ── Right Panel: AI Chat ─────────────────────────── */
+#chat-container {
+  flex: 1;
+  background-color: #ffffff;
+  border: 1px solid #dde1ea;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.07);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ── Panel Title ──────────────────────────────────── */
+.panel-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a1f2e;
+  padding-bottom: 14px;
+  border-bottom: 2px solid #2563eb;
+  margin-bottom: 4px;
+}
+
+#chat-container .panel-title {
+  display: flex;
+  align-items: center;
+  min-height: 56px;
+  padding: 10px 24px;
+  margin-bottom: 0;
+}
+
+/* ── Section Labels ───────────────────────────────── */
+.section-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #4a5268;
+  margin-bottom: 8px;
+}
+
+/* ── Upload Form ──────────────────────────────────── */
+#upload-form {
+  background-color: #f7f8fb;
+  border: 1px solid #dde1ea;
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.file-row {
+  margin-bottom: 12px;
+}
+
+#file-input {
+  width: 100%;
+  font-family: 'Roboto', sans-serif;
+  font-size: 13px;
+  color: #4a5268;
+}
+
+#upload-btn {
+  padding: 9px 20px;
+  background-color: #16a34a;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Roboto', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(22, 163, 74, 0.25);
+  transition: background-color 0.2s, box-shadow 0.2s;
+}
+
+#upload-btn:hover {
+  background-color: #15803d;
+  box-shadow: 0 4px 14px rgba(22, 163, 74, 0.35);
+}
+
+/* ── Divider ──────────────────────────────────────── */
+.divider {
+  height: 1px;
+  background-color: #e8eaf0;
+}
+
+/* ── Uploaded Docs ────────────────────────────────── */
+.docs-section {
+  flex: 1;
+}
+
+#uploaded-docs {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 40px;
+}
+
+.empty-msg {
+  font-style: italic;
+  font-size: 13px;
+  color: #9aa0b5;
+  text-align: center;
+  padding: 10px 0;
+}
+
+.doc-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  background-color: #f7f8fb;
+  border: 1px solid #dde1ea;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #1a1f2e;
+}
+
+.doc-item span {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Retrieval Dropdown ───────────────────────────── */
+.retrieval-section {
+  padding-top: 4px;
+}
+
+#retrieval-method {
+  width: 100%;
+  padding: 9px 12px;
+  font-family: 'Roboto', sans-serif;
+  font-size: 13px;
+  color: #1a1f2e;
+  background-color: #ffffff;
+  border: 1.5px solid #dde1ea;
+  border-radius: 8px;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+#retrieval-method:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+/* ── Chat Messages Area ───────────────────────────── */
+#messages {
+  flex: 1;
+  overflow-y: auto;       /* scrollable */
+  padding: 20px 24px;
+  background-color: #f7f8fb;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+#messages::-webkit-scrollbar {
+  width: 5px;
+}
+
+#messages::-webkit-scrollbar-thumb {
+  background: #dde1ea;
+  border-radius: 6px;
+}
+
+/* ── Individual Messages ──────────────────────────── */
+.message {
+  display: flex;
+  max-width: 75%;
+}
+
+.message.user {
+  align-self: flex-end;
+}
+
+.message.user .bubble {
+  background-color: #2563eb;
+  color: #ffffff;
+  border-radius: 12px 12px 4px 12px;
+}
+
+.message.system .bubble {
+  background-color: #ffffff;
+  color: #4a5268;
+  border: 1px solid #dde1ea;
+  border-radius: 12px 12px 12px 4px;
+}
+
+.bubble {
+  padding: 10px 15px;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+/* ── Chat Footer (Input + Button) ─────────────────── */
+.chat-footer {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 16px 24px;
+  border-top: 1px solid #dde1ea;
+  background-color: #ffffff;
+}
+
+#user-input {
+  flex: 1;
+  padding: 11px 16px;
+  border: 1.5px solid #dde1ea;
+  border-radius: 10px;
+  font-family: 'Roboto', sans-serif;
+  font-size: 14px;
+  color: #1a1f2e;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+#user-input::placeholder {
+  color: #9aa0b5;
+}
+
+#user-input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+#send-btn {
+  padding: 11px 24px;
+  background-color: #2563eb;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  font-family: 'Roboto', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(37, 99, 235, 0.3);
+  transition: background-color 0.2s, box-shadow 0.2s;
+}
+
+#send-btn:hover {
+  background-color: #1d4ed8;
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.35);
+}
