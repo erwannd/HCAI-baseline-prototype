@@ -104,16 +104,27 @@ const loadChatHistory = async () => {
 // Load chat history for this participant after HTML is parsed
 document.addEventListener('DOMContentLoaded', loadChatHistory)
 
+// Send message to OpenAI on button click
 sendBtn.addEventListener('click', function () {
     logEvent('click', 'SendButton');
     sendMessage();
 });
 
+// Send message to OpenAI on Enter
 inputField.addEventListener('keydown', function (event) {
     if (event.key == 'Enter') {
-        logEvent('click', 'EnterButton');
+        logEvent('keydown', 'UserInput');
         sendMessage();
     }
+});
+
+/* Log user interactions */
+sendBtn.addEventListener('mouseenter', function () {
+    logEvent('hover', 'SendButton');
+});
+
+inputField.addEventListener('focus', function () {
+    logEvent('focus', 'UserInput');
 });
 
 retrievalMethod.addEventListener('change', function () {
@@ -122,10 +133,20 @@ retrievalMethod.addEventListener('change', function () {
     logEvent('change', 'RetrievalMethodDropdown');
 });
 
+retrievalMethod.addEventListener('focus', function () {
+    logEvent('focus', 'RetrievalMethodDropdown');
+});
+
 uploadBtn.addEventListener('click', function () {
     const file = document.getElementById('file-input').files[0];
-    console.log("Selected file: " + file.name);
+    if (file) {
+        console.log("Selected file: " + file.name);
+    }
     logEvent('click', 'UploadButton');
+});
+
+uploadBtn.addEventListener('mouseenter', function () {
+    logEvent('hover', 'UploadButton');
 });
 
 fileInput.addEventListener('click', function () {

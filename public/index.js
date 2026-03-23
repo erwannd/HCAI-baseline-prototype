@@ -10,20 +10,21 @@ const storeParticipantID = () => {
 
     if (!participantID) {
         alert('Please enter a participant ID.');
-        return;
+        return false;
     }
 
     localStorage.setItem('participantID', participantID);
+    return true;
 }
 
 proceedBtn.addEventListener('click', () => {
-    storeParticipantID();
-    window.location.href = '/chat.html';
+    if (storeParticipantID()) {
+        window.location.href = '/chat.html';
+    }
 });
 
 participantInput.addEventListener('keydown', function (event) {
-    if (event.key == 'Enter') {
-        storeParticipantID();
+    if (event.key == 'Enter' && storeParticipantID()) {
         window.location.href = '/chat.html';
     }
 });
