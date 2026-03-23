@@ -102,7 +102,7 @@ app.post('/log-event', async (req, res) => {
 /**
  * Route to fetch participant's chat history
  */
-app.get('/chat-history/:participantID', async (req, res) => {
+app.get('/history/:participantID', async (req, res) => {
     const participantID = req.params.participantID
 
     if (!participantID || !participantID.trim()) {

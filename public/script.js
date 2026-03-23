@@ -84,7 +84,7 @@ const sendMessage = async () => {
 const loadChatHistory = async () => {
     try {
         // encodeURIComponent handles participantID that looks like part of URL e.g. 123?x=1
-        const resp = await fetch(`/chat-history/${encodeURIComponent(participantID)}`);
+        const resp = await fetch(`/history/${encodeURIComponent(participantID)}`);
         if (!resp.ok) {
             console.error('Failed to load chat history');
             return;
