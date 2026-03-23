@@ -40,3 +40,10 @@ An Express-based chatbot for the HCAI case study. The app uses OpenAI for chatbo
     ```
 
 2. Open http://localhost:3000
+
+## Screenshot
+- ### EventLogs Collection in Atlas
+    <img src='screenshot/event_logs_atlas.png'>
+
+- ### Interactions Collection in Atlas
+    <img src='screenshot/interactions_atlas.png'>
