@@ -70,6 +70,8 @@ const sendMessage = async () => {
         if (resp.ok) {
             let data = await resp.json();
             createChatMessage(data.botResponse, 'system')
+            document.getElementById('retrieved-evidence').innerText = `RE: ${JSON.stringify(data.retrievedDocuments)}`;
+            document.getElementById('confidence-metrics').innerText = `CM: ${JSON.stringify(data.confidenceMetrics)}`;
         } else {
             console.error("Failed to fetch response from server")
         }
@@ -137,13 +139,37 @@ retrievalMethod.addEventListener('focus', function () {
     logEvent('focus', 'RetrievalMethodDropdown');
 });
 
-uploadBtn.addEventListener('click', function () {
+uploadBtn.addEventListener('click', async function () {
     const file = document.getElementById('file-input').files[0];
     if (file) {
         console.log("Selected file: " + file.name);
     }
+    const formData = new FormData();
+
+    formData.append('document', file);
+
+    const response = await fetch("/upload-document", {
+        method: "POST",
+        body: formData
+    });
+    const data = await response.json();   
+    await loadDocuments();
     logEvent('click', 'UploadButton');
 });
+
+async function loadDocuments() {
+  const response = await fetch("/documents");
+  const docs = await response.json();
+
+  const documentsList = document.getElementById("empty-msg");
+  documentsList.innerHTML = "";
+
+  docs.forEach((doc) => {
+    const li = document.createElement('li');
+    li.textContent = doc.filename + " " + doc.processingStatus;
+    documentsList.appendChild(li);
+    });
+}
 
 uploadBtn.addEventListener('mouseenter', function () {
     logEvent('hover', 'UploadButton');

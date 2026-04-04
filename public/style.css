@@ -274,7 +274,7 @@ body.landing-page {
   min-height: 40px;
 }
 
-.empty-msg {
+#empty-msg {
   font-style: italic;
   font-size: 13px;
   color: #9aa0b5;
