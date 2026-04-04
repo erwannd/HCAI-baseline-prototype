@@ -13,6 +13,13 @@ const messagesContainer = document.getElementById('messages')
 const retrievalMethod = document.getElementById('retrieval-method')
 const uploadBtn = document.getElementById('upload-btn')
 const fileInput = document.getElementById('file-input')
+const evidenceList = document.getElementById('evidence-list');
+const evidenceEmpty = document.getElementById('evidence-empty');
+const metricOverall = document.getElementById('metric-overall');
+const metricRetrieval = document.getElementById('metric-retrieval');
+const metricResponse = document.getElementById('metric-response');
+const metricMethod = document.getElementById('metric-method');
+
 
 /**
  * Create a message bubble & append it to the Chat Container
@@ -31,6 +38,32 @@ const createChatMessage = (message, role) => {
     messagesContainer.appendChild(elem);
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
 }
+
+function renderRetrievedEvidence(docs) {
+  evidenceList.innerHTML = '';
+
+  evidenceEmpty.style.display = 'none';
+
+  docs.forEach((doc) => {
+    const item = document.createElement('div');
+    item.className = 'doc-item';
+    item.textContent = `${doc.docName} | Chunk ${doc.chunkIndex} | Score: ${doc.relevanceScore}`;
+    evidenceList.appendChild(item);
+
+    const text = document.createElement('p');
+    text.textContent = doc.chunkText;
+    evidenceList.appendChild(text);
+  });
+}
+
+function renderConfidenceMetrics(metrics) {
+  metricOverall.textContent = metrics.overallConfidence;
+  metricRetrieval.textContent = metrics.retrievalConfidence;
+  metricResponse.textContent = metrics.responseConfidence;
+  metricMethod.textContent = metrics.retrievalMethod;
+}
+
+
 
 function logEvent(type, element) {
     fetch('/log-event', {
@@ -70,8 +103,9 @@ const sendMessage = async () => {
         if (resp.ok) {
             let data = await resp.json();
             createChatMessage(data.botResponse, 'system')
-            document.getElementById('retrieved-evidence').innerText = `RE: ${JSON.stringify(data.retrievedDocuments)}`;
-            document.getElementById('confidence-metrics').innerText = `CM: ${JSON.stringify(data.confidenceMetrics)}`;
+            renderRetrievedEvidence(data.retrievedDocuments);
+            renderConfidenceMetrics(data.confidenceMetrics);
+
         } else {
             console.error("Failed to fetch response from server")
         }

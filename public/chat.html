@@ -60,12 +60,22 @@
       </div>
     </div>
 
-   <div id="chat-container">
+    <div id="rag-panel">
       <h2 class="panel-title">Information Retrieved</h2>
-      <div id="retrieved-evidence"></div><br>
+      <div class="rag-section">
+        <p id="evidence-empty" class="rag-empty">No evidence yet.</p>
+        <div id="evidence-list"></div>
+      </div>
+
       <h2 class="panel-title">Confidence Metric</h2>
-      <div id="confidence-metrics"></div><br>
+      <div class="rag-section">
+        <div class="doc-item"><span>Overall</span><span id="metric-overall">N/A</span></div>
+        <div class="doc-item"><span>Retrieval</span><span id="metric-retrieval">N/A</span></div>
+        <div class="doc-item"><span>Response</span><span id="metric-response">N/A</span></div>
+        <div class="doc-item"><span>Method</span><span id="metric-method">N/A</span></div>
+      </div>
     </div>
+
   </div>
 
   <script src="script.js"></script>
