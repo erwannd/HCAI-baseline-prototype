@@ -27,6 +27,8 @@ const metricOverall = document.getElementById('metric-overall');
 const metricRetrieval = document.getElementById('metric-retrieval');
 const metricResponse = document.getElementById('metric-response');
 const metricMethod = document.getElementById('metric-method');
+const ragPanel = document.getElementById('rag-panel');
+const closeRagBtn = document.getElementById('close-rag-btn');
 
 // TODO: maybe move this to config
 const MAX_INTERACTIONS = 5
@@ -36,8 +38,9 @@ const conversationHistory = [];
  * Create a message bubble & append it to the Chat Container
  * @param {string} message the message
  * @param {string} role 'user' OR 'assistant'
+ * @param {{ retrievedDocuments?: Array, confidenceMetrics?: Object } | null} metadata
  */
-const createChatMessage = (message, role) => {
+const createChatMessage = (message, role, metadata = null) => {
     const elem = document.createElement('div');
     elem.classList.add('message', role);
 
@@ -46,32 +49,65 @@ const createChatMessage = (message, role) => {
     bubble.textContent = message;
 
     elem.appendChild(bubble);
+
+    const hasEvidence = role === 'assistant' && metadata
+        && ((metadata.retrievedDocuments && metadata.retrievedDocuments.length > 0) || metadata.confidenceMetrics);
+
+    if (hasEvidence) {
+        const actions = document.createElement('div');
+        actions.className = 'message-actions';
+
+        const evidenceBtn = document.createElement('button');
+        evidenceBtn.type = 'button';
+        evidenceBtn.className = 'evidence-toggle';
+        evidenceBtn.textContent = 'View evidence';
+        evidenceBtn.addEventListener('click', () => {
+            renderRetrievedEvidence(metadata.retrievedDocuments || []);
+            renderConfidenceMetrics(metadata.confidenceMetrics || null);
+            ragPanel.classList.add('is-open');
+            ragPanel.setAttribute('aria-hidden', 'false');
+        });
+
+        actions.appendChild(evidenceBtn);
+        elem.appendChild(actions);
+    }
+
     messagesContainer.appendChild(elem);
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
 }
 
 function renderRetrievedEvidence(docs) {
     evidenceList.innerHTML = '';
+    evidenceEmpty.style.display = docs.length > 0 ? 'none' : 'block';
 
-    evidenceEmpty.style.display = 'none';
+    if (docs.length === 0) {
+        evidenceEmpty.textContent = 'No evidence was retrieved for this response.';
+        return;
+    }
 
     docs.forEach((doc) => {
-        const item = document.createElement('div');
-        item.className = 'doc-item';
-        item.textContent = `${doc.docName} | Chunk ${doc.chunkIndex} | Score: ${doc.relevanceScore}`;
-        evidenceList.appendChild(item);
+        const card = document.createElement('article');
+        card.className = 'evidence-card';
+
+        const title = document.createElement('div');
+        title.className = 'evidence-title';
+        title.textContent = `${doc.docName} | Chunk ${doc.chunkIndex} | Score: ${doc.relevanceScore}`;
 
         const text = document.createElement('p');
+        text.className = 'evidence-text';
         text.textContent = doc.chunkText;
-        evidenceList.appendChild(text);
+
+        card.appendChild(title);
+        card.appendChild(text);
+        evidenceList.appendChild(card);
     });
 }
 
 function renderConfidenceMetrics(metrics) {
-    metricOverall.textContent = metrics.overallConfidence;
-    metricRetrieval.textContent = metrics.retrievalConfidence;
-    metricResponse.textContent = metrics.responseConfidence;
-    metricMethod.textContent = metrics.retrievalMethod;
+    metricOverall.textContent = metrics?.overallConfidence ?? 'N/A';
+    metricRetrieval.textContent = metrics?.retrievalConfidence ?? 'N/A';
+    metricResponse.textContent = metrics?.responseConfidence ?? 'N/A';
+    metricMethod.textContent = metrics?.retrievalMethod ?? 'N/A';
 }
 
 
@@ -134,11 +170,12 @@ const sendMessage = async () => {
         })
         if (resp.ok) {
             let data = await resp.json();
-            createChatMessage(data.botResponse, 'assistant');
+            createChatMessage(data.botResponse, 'assistant', {
+                retrievedDocuments: data.retrievedDocuments,
+                confidenceMetrics: data.confidenceMetrics
+            });
             conversationHistory.push({ role: 'user', content: userMessage });
             conversationHistory.push({ role: 'assistant', content: data.botResponse });
-            renderRetrievedEvidence(data.retrievedDocuments);
-            renderConfidenceMetrics(data.confidenceMetrics);
 
         } else {
             console.error("Failed to fetch response from server")
@@ -170,7 +207,10 @@ const loadChatHistory = async () => {
         if (history.interactions && history.interactions.length > 0) {
             history.interactions.forEach((interaction) => {
                 createChatMessage(interaction.userInput, 'user');
-                createChatMessage(interaction.botResponse, 'assistant');
+                createChatMessage(interaction.botResponse, 'assistant', {
+                    retrievedDocuments: interaction.retrievedDocuments,
+                    confidenceMetrics: interaction.confidenceMetrics
+                });
 
                 conversationHistory.push({
                     role: 'user', content: interaction.userInput
@@ -186,7 +226,15 @@ const loadChatHistory = async () => {
 }
 
 // Load chat history for this participant after HTML is parsed
-document.addEventListener('DOMContentLoaded', loadChatHistory)
+document.addEventListener('DOMContentLoaded', () => {
+    loadChatHistory();
+    loadDocuments();
+});
+
+closeRagBtn.addEventListener('click', function () {
+    ragPanel.classList.remove('is-open');
+    ragPanel.setAttribute('aria-hidden', 'true');
+});
 
 // Send message to OpenAI on button click
 sendBtn.addEventListener('click', function () {
@@ -243,13 +291,22 @@ async function loadDocuments() {
     const response = await fetch("/documents");
     const docs = await response.json();
 
-    const documentsList = document.getElementById("empty-msg");
+    const documentsList = document.getElementById("uploaded-docs");
     documentsList.innerHTML = "";
 
+    if (docs.length === 0) {
+        const emptyMessage = document.createElement('p');
+        emptyMessage.id = 'empty-msg';
+        emptyMessage.textContent = 'No documents uploaded yet';
+        documentsList.appendChild(emptyMessage);
+        return;
+    }
+
     docs.forEach((doc) => {
-        const li = document.createElement('li');
-        li.textContent = doc.filename + " " + doc.processingStatus;
-        documentsList.appendChild(li);
+        const item = document.createElement('div');
+        item.className = 'doc-item';
+        item.textContent = `${doc.filename} ${doc.processingStatus}`;
+        documentsList.appendChild(item);
     });
 }
 
