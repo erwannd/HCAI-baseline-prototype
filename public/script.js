@@ -1,7 +1,15 @@
-// Check if participant ID is set, if not redirect to index.html
-const participantID = localStorage.getItem('participantID')
+/**
+ * Get participantID from URL query string.
+ * Fallback to localStorage.
+ * If not found, redirects to index.html.
+ */
+const params = new URLSearchParams(window.location.search);
+const participantID = params.get('participantID') || localStorage.getItem('participantID');
+const systemID = params.get('systemID') || localStorage.getItem('systemID');
+
 if (!participantID) {
     alert('Please enter your participant ID first.');
+    // redirect to login
     window.location.href = '/';
 }
 
@@ -20,11 +28,14 @@ const metricRetrieval = document.getElementById('metric-retrieval');
 const metricResponse = document.getElementById('metric-response');
 const metricMethod = document.getElementById('metric-method');
 
+// TODO: maybe move this to config
+const MAX_INTERACTIONS = 5
+const conversationHistory = [];
 
 /**
  * Create a message bubble & append it to the Chat Container
  * @param {string} message the message
- * @param {string} role 'user' OR 'system'
+ * @param {string} role 'user' OR 'assistant'
  */
 const createChatMessage = (message, role) => {
     const elem = document.createElement('div');
@@ -40,27 +51,27 @@ const createChatMessage = (message, role) => {
 }
 
 function renderRetrievedEvidence(docs) {
-  evidenceList.innerHTML = '';
+    evidenceList.innerHTML = '';
 
-  evidenceEmpty.style.display = 'none';
+    evidenceEmpty.style.display = 'none';
 
-  docs.forEach((doc) => {
-    const item = document.createElement('div');
-    item.className = 'doc-item';
-    item.textContent = `${doc.docName} | Chunk ${doc.chunkIndex} | Score: ${doc.relevanceScore}`;
-    evidenceList.appendChild(item);
+    docs.forEach((doc) => {
+        const item = document.createElement('div');
+        item.className = 'doc-item';
+        item.textContent = `${doc.docName} | Chunk ${doc.chunkIndex} | Score: ${doc.relevanceScore}`;
+        evidenceList.appendChild(item);
 
-    const text = document.createElement('p');
-    text.textContent = doc.chunkText;
-    evidenceList.appendChild(text);
-  });
+        const text = document.createElement('p');
+        text.textContent = doc.chunkText;
+        evidenceList.appendChild(text);
+    });
 }
 
 function renderConfidenceMetrics(metrics) {
-  metricOverall.textContent = metrics.overallConfidence;
-  metricRetrieval.textContent = metrics.retrievalConfidence;
-  metricResponse.textContent = metrics.responseConfidence;
-  metricMethod.textContent = metrics.retrievalMethod;
+    metricOverall.textContent = metrics.overallConfidence;
+    metricRetrieval.textContent = metrics.retrievalConfidence;
+    metricResponse.textContent = metrics.responseConfidence;
+    metricMethod.textContent = metrics.retrievalMethod;
 }
 
 
@@ -78,6 +89,11 @@ function logEvent(type, element) {
     });
 }
 
+/**
+ * Submits conversation history to the server.
+ * Sends the most recent 'N' messages between user and assitant.
+ * @returns
+ */
 const sendMessage = async () => {
     // Display message & clear input field
     let userMessage = inputField.value.trim();
@@ -91,18 +107,36 @@ const sendMessage = async () => {
 
     // Send message to server
     try {
+        const recentHistory = conversationHistory.slice(- MAX_INTERACTIONS * 2);
+        let payload = {};
+
+        if (recentHistory.length === 0) {
+            payload = {
+                input: userMessage,
+                retrievalMethod: retrievalMethod.value,
+                participantID,
+                systemID,
+            };
+        } else {
+            payload = {
+                history: recentHistory,
+                input: userMessage,
+                participantID,
+                systemID,
+                retrievalMethod: retrievalMethod.value
+            };
+        }
+
         const resp = await fetch("/chat", {
             method: "POST",
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                "participantID": participantID,
-                "userMessage": userMessage,
-                "retrievalMethod": retrievalMethod.value
-            }),
+            body: JSON.stringify(payload),
         })
         if (resp.ok) {
             let data = await resp.json();
-            createChatMessage(data.botResponse, 'system')
+            createChatMessage(data.botResponse, 'assistant');
+            conversationHistory.push({ role: 'user', content: userMessage });
+            conversationHistory.push({ role: 'assistant', content: data.botResponse });
             renderRetrievedEvidence(data.retrievedDocuments);
             renderConfidenceMetrics(data.confidenceMetrics);
 
@@ -115,12 +149,17 @@ const sendMessage = async () => {
 }
 
 /**
- * Load chat history for this participant
+ * Load existing chat history for this participant.
  */
 const loadChatHistory = async () => {
     try {
-        // encodeURIComponent handles participantID that looks like part of URL e.g. 123?x=1
-        const resp = await fetch(`/history/${encodeURIComponent(participantID)}`);
+        // TODO: change /history route on server.js
+        const resp = await fetch('/history', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            // Send participantID to the server and maximum conversation exchanges
+            body: JSON.stringify({ participantID, limit: MAX_INTERACTIONS })
+        });
         if (!resp.ok) {
             console.error('Failed to load chat history');
             return;
@@ -128,10 +167,19 @@ const loadChatHistory = async () => {
 
         const history = await resp.json();
 
-        history.forEach((interaction) => {
-            createChatMessage(interaction.userInput, 'user');
-            createChatMessage(interaction.botResponse, 'system');
-        });
+        if (history.interactions && history.interactions.length > 0) {
+            history.interactions.forEach((interaction) => {
+                createChatMessage(interaction.userInput, 'user');
+                createChatMessage(interaction.botResponse, 'assistant');
+
+                conversationHistory.push({
+                    role: 'user', content: interaction.userInput
+                })
+                conversationHistory.push({
+                    role: 'assistant', content: interaction.botResponse
+                })
+            });
+        }
     } catch (err) {
         console.error('Error loading chat history:', err);
     }
@@ -186,22 +234,22 @@ uploadBtn.addEventListener('click', async function () {
         method: "POST",
         body: formData
     });
-    const data = await response.json();   
+    const data = await response.json();
     await loadDocuments();
     logEvent('click', 'UploadButton');
 });
 
 async function loadDocuments() {
-  const response = await fetch("/documents");
-  const docs = await response.json();
+    const response = await fetch("/documents");
+    const docs = await response.json();
 
-  const documentsList = document.getElementById("empty-msg");
-  documentsList.innerHTML = "";
+    const documentsList = document.getElementById("empty-msg");
+    documentsList.innerHTML = "";
 
-  docs.forEach((doc) => {
-    const li = document.createElement('li');
-    li.textContent = doc.filename + " " + doc.processingStatus;
-    documentsList.appendChild(li);
+    docs.forEach((doc) => {
+        const li = document.createElement('li');
+        li.textContent = doc.filename + " " + doc.processingStatus;
+        documentsList.appendChild(li);
     });
 }
 

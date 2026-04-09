@@ -328,7 +328,8 @@ body.landing-page {
 /* ── Chat Messages Area ───────────────────────────── */
 #messages {
   flex: 1;
-  overflow-y: auto;       /* scrollable */
+  overflow-y: auto;
+  /* scrollable */
   padding: 20px 24px;
   background-color: #f7f8fb;
   display: flex;
@@ -361,7 +362,7 @@ body.landing-page {
   border-radius: 12px 12px 4px 12px;
 }
 
-.message.system .bubble {
+.message.assistant .bubble {
   background-color: #ffffff;
   color: #4a5268;
   border: 1px solid #dde1ea;

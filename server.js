@@ -16,7 +16,7 @@ const retrievalService = require('./services/retrievalService');
 const confidenceCalculator = require('./services/confidenceCalculator');
 const embeddingService = require('./services/embeddingService');
 
-const upload = multer({dest: path.join(__dirname, 'uploads')});
+const upload = multer({ dest: path.join(__dirname, 'uploads') });
 
 dotenv.config({ path: path.join(__dirname, '.env') });
 
@@ -38,10 +38,12 @@ app.get('/', (req, res) => {
 
 app.post('/chat', async (req, res) => {
 
-    const { participantID, userMessage, retrievalMethod } = req.body;
-
-    console.log(userMessage);
-    console.log(retrievalMethod);
+    const {
+        history = [],
+        input: userInput,
+        participantID,
+        retrievalMethod = 'semantic'
+    } = req.body;
 
     if (!process.env.OPENAI_API_KEY) {
         return res.status(500).json({
@@ -53,35 +55,59 @@ app.post('/chat', async (req, res) => {
         return res.status(400).json({ error: 'participantID is required' });
     }
 
-    if (!userMessage || !userMessage.trim()) {
+    if (!userInput || !userInput.trim()) {
         return res.status(400).json({
             error: 'Invalid input'
         });
     }
 
-    if (!retrievalMethod) {
-        return res.status(400).json({
-            error: 'Invalid Method'
-        })
-    }
-    
-    const retrieved = await retrievalService.retrieve(userMessage, { method: retrievalMethod, topK: 3 });
+    const safeHistory = Array.isArray(history)
+        ? history
+            .filter(m => m && (m.role === 'user' || m.role === 'assistant'))
+            .map(m => ({
+                role: m.role,
+                content: String(m.content ?? '')
+            }))
+        : [];
+
+    const retrieved = await retrievalService.retrieve(userInput, {
+        method: retrievalMethod,
+        topK: 3
+    });
 
     const retrievedDocuments = retrieved.map((chunk) => ({
-      docName: chunk.documentName,
-      chunkIndex: chunk.chunkIndex,
-      chunkText: chunk.chunkText,
-      relevanceScore: chunk.relevanceScore
+        docName: chunk.documentName,
+        chunkIndex: chunk.chunkIndex,
+        chunkText: chunk.chunkText,
+        relevanceScore: chunk.relevanceScore
     }));
 
-    const newContent = "use this " + JSON.stringify(retrievedDocuments) + " to answer this user question " + userMessage;
+    const evidenceText = retrievedDocuments.length > 0
+        ? retrievedDocuments
+            .map((doc) => `${doc.docName} chunk ${doc.chunkIndex}: ${doc.chunkText}`)
+            .join('\n\n')
+        : 'No supporting documents retrieved.';
 
     try {
-        const message = userMessage.trim();
+        const messages = [
+            {
+                role: 'system',
+                content: `You are a helpful assistant. Answer only using the retrieved evidence.`
+            },
+            ...safeHistory,
+            {
+                role: 'system',
+                content: `Retrieved evidence:\n${evidenceText}`
+            },
+            {
+                role: 'user',
+                content: userInput
+            }
+        ];
 
         const response = await openai.chat.completions.create({
             model: 'gpt-4.1-mini',
-            messages: [{ role: 'user', content: newContent }],
+            messages,
             max_tokens: 100
         });
 
@@ -90,7 +116,7 @@ app.post('/chat', async (req, res) => {
 
         const interaction = new Interaction({
             participantID: participantID,
-            userInput: message,
+            userInput: userInput,
             botResponse: botResponse,
             retrievalMethod: retrievalMethod,
             retrievedDocuments: retrievedDocuments,
@@ -99,7 +125,7 @@ app.post('/chat', async (req, res) => {
         await interaction.save();
 
         res.json({
-            botResponse: botResponse, retrievedDocuments, confidenceMetrics
+            botResponse, retrievedDocuments, confidenceMetrics
         });
     } catch (error) {
         console.error('Error interacting with OpenAI API:', error.message);
@@ -133,19 +159,21 @@ app.post('/log-event', async (req, res) => {
 /**
  * Route to fetch participant's chat history
  */
-app.get('/history/:participantID', async (req, res) => {
-    const participantID = req.params.participantID
+app.post('/history', async (req, res) => {
+    const { participantID, limit = 5 } = req.body;
 
     if (!participantID || !participantID.trim()) {
         return res.status(400).json({ error: 'participantID is required' });
     }
 
     try {
-        const history = await Interaction
+        const interactions = await Interaction
             .find({ "participantID": participantID, })
-            .sort({ timestamp: 'asc' });
+            .sort({ timestamp: -1 })
+            .limit(limit);
 
-        res.json(history);
+        interactions.reverse();
+        res.json({ interactions });
     } catch (error) {
         console.error('Error fetching chat history:', error.message);
         res.status(500).send('Server Error');
@@ -153,46 +181,46 @@ app.get('/history/:participantID', async (req, res) => {
 })
 
 app.post("/upload-document", upload.single("document"), async (req, res) => {
- 
-  if (!req.file) {
-  return res.status(400).json({ error: 'File not found' });
-  }
 
-  try {
-    
-    const processed = await documentProcessor.processDocument(req.file);
+    if (!req.file) {
+        return res.status(400).json({ error: 'File not found' });
+    }
 
-    const document = new Document({
-      filename: req.file.originalname,
-      text: processed.fullText,
-      chunks: await embeddingService.generateEmbeddings(processed.chunks),
-      processingStatus: 'completed'
-    })
-    
-    await document.save();
+    try {
 
-    await retrievalService.rebuildIndex()
-    
-    res.json({
-    status: 'success',
-    filename: document.filename,
-    chunkCount: document.chunks.length
-    });
-  } catch (error) {
-    console.error("Error uploading document:", error.message);
-    res.status(500).json({
-      error: "Failed to process document",
-      details: error.message
-    });
-  }
+        const processed = await documentProcessor.processDocument(req.file);
+
+        const document = new Document({
+            filename: req.file.originalname,
+            text: processed.fullText,
+            chunks: await embeddingService.generateEmbeddings(processed.chunks),
+            processingStatus: 'completed'
+        })
+
+        await document.save();
+
+        await retrievalService.rebuildIndex()
+
+        res.json({
+            status: 'success',
+            filename: document.filename,
+            chunkCount: document.chunks.length
+        });
+    } catch (error) {
+        console.error("Error uploading document:", error.message);
+        res.status(500).json({
+            error: "Failed to process document",
+            details: error.message
+        });
+    }
 });
 
 app.get("/documents", async (req, res) => {
 
-  
+
     const documents = await Document.find(
-      {},
-      '_id filename processingStatus processedAt'
+        {},
+        '_id filename processingStatus processedAt'
     ).sort({ processedAt: -1 });
 
     res.json(documents);
