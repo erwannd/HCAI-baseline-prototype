@@ -51,3 +51,6 @@ An Express-based chatbot for the HCAI case study. The app uses OpenAI for chatbo
 
 ### EventLogs Collection in Atlas
 <img src='screenshot/event_logs_atlas.png'>
+
+### Chat interface
+<img src='screenshot/chat-interface.png'>
