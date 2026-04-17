@@ -1,11 +1,14 @@
-/**
- * Get participantID from URL query string.
- * Fallback to localStorage.
- * If not found, redirects to index.html.
- */
 const params = new URLSearchParams(window.location.search);
 const participantID = params.get('participantID') || localStorage.getItem('participantID');
-const systemID = params.get('systemID') || localStorage.getItem('systemID');
+const systemID = params.get('systemID');
+
+document.getElementById('prototype-btn').addEventListener('click', () => {
+  window.location.href = `/chat.html?participantID=${participantID}&systemID=${systemID}`;
+});
+
+document.getElementById('task-btn').addEventListener('click', () => {
+  alert('Add your task instructions here or link this button to a task page.');
+});
 
 if (!participantID) {
     alert('Please enter your participant ID first.');
@@ -112,7 +115,8 @@ function redirectToQualtrics() {
     .then(response => response.text())
     .then(url => {
       logEvent('redirect', 'Qualtrics Survey');
-      window.location.href = url;
+      //window.location.href = url;
+      window.open(url, '_blank');
     })
     .catch(error => {
       console.error('Error redirecting to survey:', error);
@@ -122,6 +126,8 @@ function redirectToQualtrics() {
 
 document.getElementById('survey-btn').addEventListener('click', redirectToQualtrics);
 
+const participantDisplay = document.getElementById('participant-display');
+participantDisplay.textContent = participantID;
 function renderConfidenceMetrics(metrics) {
     metricOverall.textContent = metrics?.overallConfidence ?? 'N/A';
     metricRetrieval.textContent = metrics?.retrievalConfidence ?? 'N/A';

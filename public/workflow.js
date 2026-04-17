@@ -16,7 +16,7 @@ if (systemID) {
 }
 
 const stateKey = `workflowState:${participantID}`;
-const surveyBtn = document.getElementById('survey-btn');
+
 const taskBtn = document.getElementById('task-btn');
 const prototypeBtn = document.getElementById('prototype-btn');
 const taskPanel = document.getElementById('task-panel');
@@ -74,16 +74,6 @@ const buildQuery = () => {
 participantDisplay.textContent = participantID;
 renderWorkflow();
 
-surveyBtn.addEventListener('click', () => {
-    const qualtricsUrl = new URL('https://usfca.qualtrics.com/jfe/form/SV_PLACEHOLDER');
-    qualtricsUrl.searchParams.set('participantID', participantID);
-
-    window.open(qualtricsUrl.toString(), '_blank', 'noopener');
-
-    workflowState.surveyComplete = true;
-    saveState();
-    renderWorkflow();
-});
 
 taskBtn.addEventListener('click', () => {
     taskPanel.hidden = false;
