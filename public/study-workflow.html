@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Workflow</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+</head>
+
+<body class="workflow-page">
+    <main class="workflow-shell">
+        <section class="workflow-header">
+            <p class="landing-eyebrow">Human-Centered AI Study</p>
+            <div class="workflow-heading-row">
+                <div>
+                    <h1>Study Workflow</h1>
+                    <p class="workflow-copy">Please complete the following steps in order.</p>
+                </div>
+                <div class="participant-pill">
+                    <span>Participant</span>
+                    <strong id="participant-display">Loading</strong>
+                </div>
+            </div>
+        </section>
+
+        <ol id="workflow-list" class="workflow-list">
+            <li class="workflow-step is-active" data-step="survey">
+                <button id="survey-btn" class="workflow-btn" type="button">
+                    <span class="workflow-index">1</span>
+                    <span class="workflow-text">
+                        <span class="workflow-title">Complete the demographics questionnaire.</span>
+                        <span class="workflow-detail">Open Qualtrics in a new tab with your participant ID attached.</span>
+                    </span>
+                    <span class="workflow-status">Ready</span>
+                </button>
+            </li>
+
+            <li class="workflow-step is-locked" data-step="task">
+                <button id="task-btn" class="workflow-btn" type="button" disabled>
+                    <span class="workflow-index">2</span>
+                    <span class="workflow-text">
+                        <span class="workflow-title">Read the task.</span>
+                        <span class="workflow-detail">Review the instructions before starting the AI session.</span>
+                    </span>
+                    <span class="workflow-status">Locked</span>
+                </button>
+            </li>
+
+            <li class="workflow-step is-locked" data-step="prototype">
+                <button id="prototype-btn" class="workflow-btn" type="button" disabled>
+                    <span class="workflow-index">3</span>
+                    <span class="workflow-text">
+                        <span class="workflow-title">Use the AI system to complete the task.</span>
+                        <span class="workflow-detail">Continue to your assigned version of the chatbot.</span>
+                    </span>
+                    <span class="workflow-status">Locked</span>
+                </button>
+            </li>
+        </ol>
+
+        <section id="task-panel" class="task-panel" hidden>
+            <p class="section-label">Task</p>
+            <h2>Prepare to use the AI system</h2>
+            <p>
+                Read the study task provided by the research team. When you understand what you need to do,
+                confirm below to unlock the AI system.
+            </p>
+            <button id="task-complete-btn" type="button">I have read the task</button>
+        </section>
+    </main>
+
+    <script src="workflow.js"></script>
+</body>
+
+</html>

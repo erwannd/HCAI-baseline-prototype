@@ -26,7 +26,7 @@ const getSystemID = (participantID) => {
     return parseInt(participantID, 10) % 2 === 1 ? 1 : 2;
 }
 
-const proceedToChat = () => {
+const proceedToWorkflow = () => {
     const { ok, participantID } = storeParticipantID()
     if (!ok) {
         return;
@@ -34,16 +34,16 @@ const proceedToChat = () => {
 
     const systemID = getSystemID(participantID)
     localStorage.setItem('systemID', systemID);
-    window.location.href = `/chat.html?participantID=${participantID}&systemID=${systemID}`;
+    window.location.href = `/study-workflow.html?participantID=${encodeURIComponent(participantID)}&systemID=${encodeURIComponent(systemID)}`;
 }
 
-// Redirect to chat page with participantID and systemID in the URL
-proceedBtn.addEventListener('click', proceedToChat);
+// Redirect to workflow page with participantID and systemID in the URL
+proceedBtn.addEventListener('click', proceedToWorkflow);
 
-// Redirect to chat page with participantID and systemID in the URL
+// Redirect to workflow page with participantID and systemID in the URL
 participantInput.addEventListener('keydown', function (event) {
     if (event.key === 'Enter') {
         event.preventDefault();
-        proceedToChat();
+        proceedToWorkflow();
     }
 });
