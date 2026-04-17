@@ -56,6 +56,25 @@ function renderRetrievedEvidence(docs) {
   });
 }
 
+function redirectToQualtrics() {
+  fetch('/redirect-to-survey', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ participantID })
+  })
+    .then(response => response.text())
+    .then(url => {
+      logEvent('redirect', 'Qualtrics Survey');
+      window.location.href = url;
+    })
+    .catch(error => {
+      console.error('Error redirecting to survey:', error);
+      alert('There was an error redirecting to the survey. Please try again.');
+    });
+}
+
+document.getElementById('survey-btn').addEventListener('click', redirectToQualtrics);
+
 function renderConfidenceMetrics(metrics) {
   metricOverall.textContent = metrics.overallConfidence;
   metricRetrieval.textContent = metrics.retrievalConfidence;

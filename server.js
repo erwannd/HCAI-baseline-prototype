@@ -152,6 +152,16 @@ app.get('/history/:participantID', async (req, res) => {
     }
 })
 
+app.post('/redirect-to-survey', (req, res) => {
+  const { participantID } = req.body;
+
+  const qualtricsBaseUrl = 'https://usfca.qualtrics.com/jfe/form/SV_SV_6eVjm5xYBdZXA5U';
+
+  const surveyUrl = `${qualtricsBaseUrl}?participantID=${encodeURIComponent(participantID)}`;
+
+  res.send(surveyUrl);
+});
+
 app.post("/upload-document", upload.single("document"), async (req, res) => {
  
   if (!req.file) {
