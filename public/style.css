@@ -852,3 +852,20 @@ body.workflow-page {
   }
 
 }
+
+#task-download-btn {
+  display: inline-block;
+  padding: 11px 18px;
+  border-radius: 8px;
+  background-color: #2563eb;
+  color: #ffffff;
+  text-decoration: none;
+  font-family: 'Roboto', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 8px 18px rgba(37, 99, 235, 0.2);
+}
+
+#task-download-btn:hover {
+  background-color: #1d4ed8;
+}
