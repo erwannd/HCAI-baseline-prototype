@@ -2,13 +2,21 @@ const params = new URLSearchParams(window.location.search);
 const participantID = params.get('participantID') || localStorage.getItem('participantID');
 const systemID = params.get('systemID');
 
-document.getElementById('prototype-btn').addEventListener('click', () => {
-  window.location.href = `/chat.html?participantID=${participantID}&systemID=${systemID}`;
-});
+const prototypeBtn = document.getElementById('prototype-btn');
 
-document.getElementById('task-btn').addEventListener('click', () => {
-  window.open(`/task.html`, '_blank');
-});
+if (prototypeBtn) {
+  prototypeBtn.addEventListener('click', () => {
+    window.location.href = `/chat.html?participantID=${participantID}&systemID=${systemID}`;
+  });
+}
+
+const taskBtn = document.getElementById('task-btn');
+
+if (taskBtn) {
+  taskBtn.addEventListener('click', () => {
+    window.open(`/task.html`, '_blank');
+  });
+}
 
 if (!participantID) {
     alert('Please enter your participant ID first.');
@@ -142,12 +150,16 @@ function redirectToPostSurvey() {
     });
 }
 
-document.getElementById('survey-btn').addEventListener('click', redirectToSurvey);
+document.getElementById('survey-btn')?.addEventListener('click', redirectToSurvey);
 
-document.getElementById('post-survey-btn').addEventListener('click', redirectToPostSurvey);
+document.getElementById('post-survey-btn')?.addEventListener('click', redirectToPostSurvey);
 
 const participantDisplay = document.getElementById('participant-display');
-participantDisplay.textContent = participantID;
+
+if (participantDisplay) {
+  participantDisplay.textContent = participantID;
+}
+
 function renderConfidenceMetrics(metrics) {
     metricOverall.textContent = metrics?.overallConfidence ?? 'N/A';
     metricRetrieval.textContent = metrics?.retrievalConfidence ?? 'N/A';
@@ -276,19 +288,19 @@ document.addEventListener('DOMContentLoaded', () => {
     loadDocuments();
 });
 
-closeRagBtn.addEventListener('click', function () {
-    ragPanel.classList.remove('is-open');
-    ragPanel.setAttribute('aria-hidden', 'true');
+closeRagBtn?.addEventListener('click', function () {
+    ragPanel?.classList.remove('is-open');
+    ragPanel?.setAttribute('aria-hidden', 'true');
 });
 
 // Send message to OpenAI on button click
-sendBtn.addEventListener('click', function () {
+sendBtn?.addEventListener('click', function () {
     logEvent('click', 'SendButton');
     sendMessage();
 });
 
 // Send message to OpenAI on Enter
-inputField.addEventListener('keydown', function (event) {
+inputField?.addEventListener('keydown', function (event) {
     if (event.key == 'Enter') {
         logEvent('keydown', 'UserInput');
         sendMessage();
@@ -296,31 +308,32 @@ inputField.addEventListener('keydown', function (event) {
 });
 
 /* Log user interactions */
-sendBtn.addEventListener('mouseenter', function () {
+sendBtn?.addEventListener('mouseenter', function () {
     logEvent('hover', 'SendButton');
 });
 
-inputField.addEventListener('focus', function () {
+inputField?.addEventListener('focus', function () {
     logEvent('focus', 'UserInput');
 });
 
-retrievalMethod.addEventListener('change', function () {
+retrievalMethod?.addEventListener('change', function () {
     const selectedMethod = retrievalMethod.value;
     console.log("Retrieval method: " + selectedMethod);
     logEvent('change', 'RetrievalMethodDropdown');
 });
 
-retrievalMethod.addEventListener('focus', function () {
+retrievalMethod?.addEventListener('focus', function () {
     logEvent('focus', 'RetrievalMethodDropdown');
 });
 
-uploadBtn.addEventListener('click', async function () {
+uploadBtn?.addEventListener('click', async function () {
     const file = document.getElementById('file-input').files[0];
+
     if (file) {
         console.log("Selected file: " + file.name);
     }
-    const formData = new FormData();
 
+    const formData = new FormData();
     formData.append('document', file);
 
     const response = await fetch("/upload-document", {
@@ -355,11 +368,11 @@ async function loadDocuments() {
     });
 }
 
-uploadBtn.addEventListener('mouseenter', function () {
+uploadBtn?.addEventListener('mouseenter', function () {
     logEvent('hover', 'UploadButton');
 });
 
-fileInput.addEventListener('click', function () {
+fileInput?.addEventListener('click', function () {
     const file = document.getElementById('file-input');
     console.log("Button Selected");
     logEvent('click', 'FileInput');
