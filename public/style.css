@@ -165,6 +165,10 @@ body.workflow-page {
   overflow: auto;
 }
 
+body.workflow-page.modal-open {
+  overflow: hidden;
+}
+
 .workflow-shell {
   width: min(100%, 1240px);
   margin: 0 auto;
@@ -184,6 +188,22 @@ body.workflow-page {
 
 .workflow-header {
   padding: 34px 40px;
+}
+
+.task-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(15, 23, 42, 0.42);
+  backdrop-filter: blur(6px);
+}
+
+.task-modal {
+  width: min(100%, 760px);
 }
 
 .workflow-heading-row {
@@ -350,7 +370,7 @@ body.workflow-page {
 }
 
 .task-panel {
-  padding: 24px;
+  padding: 34px 40px;
 }
 
 @media (max-width: 960px) {
@@ -385,6 +405,14 @@ body.workflow-page {
     grid-column: 2;
     justify-self: flex-start;
   }
+
+  .task-modal-backdrop {
+    padding: 16px;
+  }
+
+  .task-panel {
+    padding: 28px 24px;
+  }
 }
 
 .task-panel h2 {
@@ -393,11 +421,21 @@ body.workflow-page {
   color: #1a1f2e;
 }
 
+.task-panel--modal h2 {
+  margin-bottom: 18px;
+}
+
 .task-panel p:not(.section-label) {
   max-width: 72ch;
   margin-bottom: 18px;
   color: #4a5268;
   line-height: 1.65;
+}
+
+.task-panel--modal #task-download-btn {
+  display: inline-flex;
+  margin-top: 8px;
+  margin-bottom: 24px;
 }
 
 #task-complete-btn {

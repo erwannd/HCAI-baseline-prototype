@@ -24,7 +24,7 @@ const prePrototypeSurveyBtn = document.getElementById('pre-prototype-survey-btn'
 const prePrototypeSurveyBtnTwo = document.getElementById('pre-prototype-survey-btn-2');
 const prototypeBtn = document.getElementById('prototype-btn');
 const postSurveyBtn = document.getElementById('post-survey-btn');
-const taskPanel = document.getElementById('task-panel');
+const taskModal = document.getElementById('task-modal');
 const taskCompleteBtn = document.getElementById('task-complete-btn');
 const participantDisplay = document.getElementById('participant-display');
 
@@ -183,11 +183,15 @@ surveyBtn?.addEventListener('click', () => {
 });
 
 taskBtn?.addEventListener('click', () => {
-    taskPanel.hidden = false;
-    taskPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    taskModal.hidden = false;
+    taskModal.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('modal-open');
 });
 
 taskCompleteBtn?.addEventListener('click', () => {
+    taskModal.hidden = true;
+    taskModal.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('modal-open');
     workflowState.taskComplete = true;
     saveState();
     renderWorkflow();

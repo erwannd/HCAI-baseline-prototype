@@ -95,16 +95,43 @@
 
         </ol>
 
-        <section id="task-panel" class="task-panel" hidden>
-            <p class="section-label">Task</p>
-            <h2>Prepare to use the AI system</h2>
-            <p>
-                Read the study task provided by the research team. When you understand what you need to do,
-                confirm below to unlock the AI system.
-            </p>
-            <button id="task-complete-btn" type="button">I have read the task</button>
-        </section>
     </main>
+
+    <section id="task-modal" class="task-modal-backdrop" hidden aria-hidden="true">
+        <div class="task-modal" role="dialog" aria-modal="true" aria-labelledby="task-modal-title">
+            <section class="task-panel task-panel--modal">
+                <h2 id="task-modal-title">Task: PCA and Dimensionality Reduction</h2>
+
+                <p class="section-label">Scenario</p>
+
+                <p>
+                    You are preparing for an upcoming machine learning exam and realize
+                    that you are struggling to understand PCA and dimensionality reduction.
+                    Your professor uploaded lecture slides covering the topic, but you
+                    still feel unsure about how PCA actually works and why it is important
+                    in machine learning.
+                </p>
+
+                <p>
+                    You decide to use the AI learning system to better understand the
+                    material before the exam.
+                </p>
+
+                <p class="section-label">Task</p>
+
+                <p>
+                    Download the lecture slides below, then use the AI learning system to
+                    learn as much as you can about PCA and dimensionality reduction.
+                </p>
+
+                <a id="task-download-btn" href="PCA Slides.pdf" download>
+                    Download PCA Slides
+                </a>
+
+                <button id="task-complete-btn" type="button">I have read and understand the task</button>
+            </section>
+        </div>
+    </section>
 
     <script src="workflow.js"></script>
 </body>
