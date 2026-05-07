@@ -215,11 +215,11 @@ prototypeBtn?.addEventListener('click', () => {
     renderWorkflow();
 
     if (String(systemID) === '2') {
-        window.location.href = `${enhancedPrototypeUrl}/?${buildQuery()}`;
+        window.open(`${enhancedPrototypeUrl}/?${buildQuery()}`, '_blank');
         return;
     }
 
-    window.location.href = `/chat.html?${buildQuery()}`;
+    window.open(`/chat.html?${buildQuery()}`, '_blank');
 });
 
 postSurveyBtn?.addEventListener('click', () => {
