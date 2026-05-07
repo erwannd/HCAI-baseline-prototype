@@ -1,22 +1,6 @@
 const params = new URLSearchParams(window.location.search);
 const participantID = params.get('participantID') || localStorage.getItem('participantID');
-const systemID = params.get('systemID');
-
-const prototypeBtn = document.getElementById('prototype-btn');
-
-if (prototypeBtn) {
-  prototypeBtn.addEventListener('click', () => {
-    window.location.href = `/chat.html?participantID=${participantID}&systemID=${systemID}`;
-  });
-}
-
-const taskBtn = document.getElementById('task-btn');
-
-if (taskBtn) {
-  taskBtn.addEventListener('click', () => {
-    window.open(`/task.html`, '_blank');
-  });
-}
+const systemID = params.get('systemID') || localStorage.getItem('systemID');
 
 if (!participantID) {
     alert('Please enter your participant ID first.');
@@ -112,92 +96,6 @@ function renderRetrievedEvidence(docs) {
         card.appendChild(text);
         evidenceList.appendChild(card);
     });
-}
-
-function redirectToSurvey() {
-  fetch('/redirect-to-survey', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ participantID })
-  })
-    .then(response => response.text())
-    .then(url => {
-      logEvent('redirect', 'Qualtrics Survey');
-      //window.location.href = url;
-      window.open(url, '_blank');
-    })
-    .catch(error => {
-      console.error('Error redirecting to survey:', error);
-      alert('There was an error redirecting to the survey. Please try again.');
-    });
-}
-
-function redirectToPrePrototypeSurvey() {
-  fetch('/redirect-to-pre-prototype-survey', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ participantID })
-  })
-    .then(response => response.text())
-    .then(url => {
-      logEvent('redirect', 'Qualtrics Survey');
-      //window.location.href = url;
-      window.open(url, '_blank');
-    })
-    .catch(error => {
-      console.error('Error redirecting to survey:', error);
-      alert('There was an error redirecting to the survey. Please try again.');
-    });
-}
-
-function redirectToPrePrototypeSurveyTwo() {
-  fetch('/redirect-to-pre-prototype-survey-two', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ participantID })
-  })
-    .then(response => response.text())
-    .then(url => {
-      logEvent('redirect', 'Qualtrics Survey');
-      //window.location.href = url;
-      window.open(url, '_blank');
-    })
-    .catch(error => {
-      console.error('Error redirecting to survey:', error);
-      alert('There was an error redirecting to the survey. Please try again.');
-    });
-}
-
-function redirectToPostSurvey() {
-  fetch('/redirect-to-post-survey', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ participantID })
-  })
-    .then(response => response.text())
-    .then(url => {
-      logEvent('redirect', 'Qualtrics Survey');
-      //window.location.href = url;
-      window.open(url, '_blank');
-    })
-    .catch(error => {
-      console.error('Error redirecting to survey:', error);
-      alert('There was an error redirecting to the survey. Please try again.');
-    });
-}
-
-document.getElementById('survey-btn')?.addEventListener('click', redirectToSurvey);
-
-document.getElementById('pre-prototype-survey-btn')?.addEventListener('click', redirectToPrePrototypeSurvey)
-
-document.getElementById('pre-prototype-survey-btn-2')?.addEventListener('click', redirectToPrePrototypeSurveyTwo)
-
-document.getElementById('post-survey-btn')?.addEventListener('click', redirectToPostSurvey);
-
-const participantDisplay = document.getElementById('participant-display');
-
-if (participantDisplay) {
-  participantDisplay.textContent = participantID;
 }
 
 function renderConfidenceMetrics(metrics) {

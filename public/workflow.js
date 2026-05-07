@@ -21,6 +21,7 @@ const stateKey = `workflowState:${participantID}`;
 const surveyBtn = document.getElementById('survey-btn');
 const taskBtn = document.getElementById('task-btn');
 const prePrototypeSurveyBtn = document.getElementById('pre-prototype-survey-btn');
+const prePrototypeSurveyBtnTwo = document.getElementById('pre-prototype-survey-btn-2');
 const prototypeBtn = document.getElementById('prototype-btn');
 const postSurveyBtn = document.getElementById('post-survey-btn');
 const taskPanel = document.getElementById('task-panel');
@@ -33,6 +34,7 @@ const getInitialState = () => {
             surveyStarted: false,
             taskComplete: false,
             prePrototypeSurveyStarted: false,
+            prePrototypeSurveyTwoStarted: false,
             prototypeStarted: false,
             postSurveyStarted: false,
         };
@@ -41,6 +43,7 @@ const getInitialState = () => {
             surveyStarted: false,
             taskComplete: false,
             prePrototypeSurveyStarted: false,
+            prePrototypeSurveyTwoStarted: false,
             prototypeStarted: false,
             postSurveyStarted: false,
         };
@@ -97,11 +100,21 @@ const renderWorkflow = () => {
     );
 
     setStepState(
-        'prototype',
+        'pre-prototype-survey-2',
         workflowState.prePrototypeSurveyStarted
-            ? (workflowState.prototypeStarted ? 'complete' : 'active')
+            ? (workflowState.prePrototypeSurveyTwoStarted ? 'complete' : 'active')
             : 'locked',
         workflowState.prePrototypeSurveyStarted
+            ? (workflowState.prePrototypeSurveyTwoStarted ? 'Started' : 'Ready')
+            : 'Locked',
+    );
+
+    setStepState(
+        'prototype',
+        workflowState.prePrototypeSurveyTwoStarted
+            ? (workflowState.prototypeStarted ? 'complete' : 'active')
+            : 'locked',
+        workflowState.prePrototypeSurveyTwoStarted
             ? (workflowState.prototypeStarted ? 'Started' : 'Ready')
             : 'Locked',
     );
@@ -182,6 +195,14 @@ taskCompleteBtn?.addEventListener('click', () => {
 
 prePrototypeSurveyBtn?.addEventListener('click', () => {
     openSurvey('/redirect-to-pre-prototype-survey', 'prePrototypeSurveyStarted', 'Pre-Task Survey');
+});
+
+prePrototypeSurveyBtnTwo?.addEventListener('click', () => {
+    openSurvey(
+        '/redirect-to-pre-prototype-survey-two',
+        'prePrototypeSurveyTwoStarted',
+        'Pre-Task Knowledge Survey',
+    );
 });
 
 prototypeBtn?.addEventListener('click', () => {
