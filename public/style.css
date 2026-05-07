@@ -159,17 +159,18 @@ body.workflow-page {
   background:
     radial-gradient(circle at top left, rgba(37, 99, 235, 0.16), transparent 32%),
     linear-gradient(135deg, #eef4ff 0%, #f7f9fc 48%, #edf7f2 100%);
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  padding: 32px 20px;
+  padding: 28px 24px 48px;
   overflow: auto;
 }
 
 .workflow-shell {
-  width: min(100%, 900px);
+  width: min(100%, 1240px);
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 20px;
 }
 
 .workflow-header,
@@ -177,12 +178,12 @@ body.workflow-page {
 .task-panel {
   background-color: rgba(255, 255, 255, 0.92);
   border: 1px solid #dde1ea;
-  border-radius: 8px;
+  border-radius: 18px;
   box-shadow: 0 20px 50px rgba(15, 23, 42, 0.08);
 }
 
 .workflow-header {
-  padding: 30px;
+  padding: 34px 40px;
 }
 
 .workflow-heading-row {
@@ -209,9 +210,9 @@ body.workflow-page {
 .participant-pill {
   flex: 0 0 auto;
   min-width: 150px;
-  padding: 12px 14px;
+  padding: 14px 18px;
   border: 1px solid #dde1ea;
-  border-radius: 8px;
+  border-radius: 14px;
   background-color: #f8fbff;
 }
 
@@ -242,6 +243,10 @@ body.workflow-page {
 
 .workflow-step + .workflow-step {
   border-top: 1px solid #e8eaf0;
+}
+
+.workflow-step {
+  transition: opacity 0.2s ease, filter 0.2s ease;
 }
 
 .workflow-btn {
@@ -319,13 +324,23 @@ body.workflow-page {
 
 .workflow-step.is-locked .workflow-btn {
   background-color: #f2f4f8;
-  opacity: 0.58;
+  opacity: 0.55;
+  filter: saturate(0.72);
 }
 
 .workflow-step.is-locked .workflow-index,
 .workflow-step.is-locked .workflow-status {
   background-color: #e4e7ee;
   color: #7b879d;
+}
+
+.workflow-step.is-locked .workflow-title,
+.workflow-step.is-locked .workflow-detail {
+  color: #7b879d;
+}
+
+.workflow-step.is-locked .workflow-detail {
+  opacity: 0.9;
 }
 
 .workflow-step.is-complete .workflow-index,
@@ -336,6 +351,40 @@ body.workflow-page {
 
 .task-panel {
   padding: 24px;
+}
+
+@media (max-width: 960px) {
+  body.workflow-page {
+    padding: 20px 14px 28px;
+  }
+
+  .workflow-shell {
+    width: 100%;
+  }
+
+  .workflow-header {
+    padding: 24px 22px;
+  }
+
+  .workflow-heading-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .participant-pill {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .workflow-btn {
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: flex-start;
+  }
+
+  .workflow-status {
+    grid-column: 2;
+    justify-self: flex-start;
+  }
 }
 
 .task-panel h2 {

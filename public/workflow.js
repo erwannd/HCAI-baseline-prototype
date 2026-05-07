@@ -1,6 +1,7 @@
 const params = new URLSearchParams(window.location.search);
 const participantID = params.get('participantID') || localStorage.getItem('participantID');
 const systemID = params.get('systemID') || localStorage.getItem('systemID');
+const enhancedPrototypeUrl = 'https://hcai-enhanced-prototype-1.onrender.com';
 
 if (!participantID) {
     alert('Please enter your participant ID first.');
@@ -17,8 +18,11 @@ if (systemID) {
 
 const stateKey = `workflowState:${participantID}`;
 
+const surveyBtn = document.getElementById('survey-btn');
 const taskBtn = document.getElementById('task-btn');
+const prePrototypeSurveyBtn = document.getElementById('pre-prototype-survey-btn');
 const prototypeBtn = document.getElementById('prototype-btn');
+const postSurveyBtn = document.getElementById('post-survey-btn');
 const taskPanel = document.getElementById('task-panel');
 const taskCompleteBtn = document.getElementById('task-complete-btn');
 const participantDisplay = document.getElementById('participant-display');
@@ -26,13 +30,19 @@ const participantDisplay = document.getElementById('participant-display');
 const getInitialState = () => {
     try {
         return JSON.parse(localStorage.getItem(stateKey)) || {
-            surveyComplete: false,
-            taskComplete: false
+            surveyStarted: false,
+            taskComplete: false,
+            prePrototypeSurveyStarted: false,
+            prototypeStarted: false,
+            postSurveyStarted: false,
         };
     } catch (error) {
         return {
-            surveyComplete: false,
-            taskComplete: false
+            surveyStarted: false,
+            taskComplete: false,
+            prePrototypeSurveyStarted: false,
+            prototypeStarted: false,
+            postSurveyStarted: false,
         };
     }
 };
@@ -45,6 +55,11 @@ const saveState = () => {
 
 const setStepState = (stepName, status, label) => {
     const step = document.querySelector(`[data-step="${stepName}"]`);
+
+    if (!step) {
+        return;
+    }
+
     const button = step.querySelector('.workflow-btn');
     const statusText = step.querySelector('.workflow-status');
 
@@ -55,9 +70,51 @@ const setStepState = (stepName, status, label) => {
 };
 
 const renderWorkflow = () => {
-    setStepState('survey', workflowState.surveyComplete ? 'complete' : 'active', workflowState.surveyComplete ? 'Done' : 'Ready');
-    setStepState('task', workflowState.surveyComplete ? (workflowState.taskComplete ? 'complete' : 'active') : 'locked', workflowState.surveyComplete ? (workflowState.taskComplete ? 'Done' : 'Ready') : 'Locked');
-    setStepState('prototype', workflowState.taskComplete ? 'active' : 'locked', workflowState.taskComplete ? 'Ready' : 'Locked');
+    setStepState(
+        'survey',
+        workflowState.surveyStarted ? 'complete' : 'active',
+        workflowState.surveyStarted ? 'Started' : 'Ready',
+    );
+
+    setStepState(
+        'task',
+        workflowState.surveyStarted
+            ? (workflowState.taskComplete ? 'complete' : 'active')
+            : 'locked',
+        workflowState.surveyStarted
+            ? (workflowState.taskComplete ? 'Done' : 'Ready')
+            : 'Locked',
+    );
+
+    setStepState(
+        'pre-prototype-survey',
+        workflowState.taskComplete
+            ? (workflowState.prePrototypeSurveyStarted ? 'complete' : 'active')
+            : 'locked',
+        workflowState.taskComplete
+            ? (workflowState.prePrototypeSurveyStarted ? 'Started' : 'Ready')
+            : 'Locked',
+    );
+
+    setStepState(
+        'prototype',
+        workflowState.prePrototypeSurveyStarted
+            ? (workflowState.prototypeStarted ? 'complete' : 'active')
+            : 'locked',
+        workflowState.prePrototypeSurveyStarted
+            ? (workflowState.prototypeStarted ? 'Started' : 'Ready')
+            : 'Locked',
+    );
+
+    setStepState(
+        'post-survey',
+        workflowState.prototypeStarted
+            ? (workflowState.postSurveyStarted ? 'complete' : 'active')
+            : 'locked',
+        workflowState.prototypeStarted
+            ? (workflowState.postSurveyStarted ? 'Started' : 'Ready')
+            : 'Locked',
+    );
 };
 
 const buildQuery = () => {
@@ -71,21 +128,75 @@ const buildQuery = () => {
     return query.toString();
 };
 
+function logEvent(type, element) {
+    fetch('/log-event', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            participantID,
+            eventType: type,
+            elementName: element,
+            timestamp: new Date(),
+        }),
+    }).catch(() => undefined);
+}
+
+function openSurvey(endpoint, stateKeyName, elementName) {
+    workflowState[stateKeyName] = true;
+    saveState();
+    renderWorkflow();
+
+    fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ participantID }),
+    })
+        .then((response) => response.text())
+        .then((url) => {
+            logEvent('redirect', elementName);
+            window.open(url, '_blank');
+        })
+        .catch((error) => {
+            console.error(`Error redirecting to ${elementName}:`, error);
+            alert('There was an error redirecting to the survey. Please try again.');
+        });
+}
+
 participantDisplay.textContent = participantID;
 renderWorkflow();
 
+surveyBtn?.addEventListener('click', () => {
+    openSurvey('/redirect-to-survey', 'surveyStarted', 'Demographics Survey');
+});
 
-taskBtn.addEventListener('click', () => {
+taskBtn?.addEventListener('click', () => {
     taskPanel.hidden = false;
     taskPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 });
 
-taskCompleteBtn.addEventListener('click', () => {
+taskCompleteBtn?.addEventListener('click', () => {
     workflowState.taskComplete = true;
     saveState();
     renderWorkflow();
 });
 
-prototypeBtn.addEventListener('click', () => {
+prePrototypeSurveyBtn?.addEventListener('click', () => {
+    openSurvey('/redirect-to-pre-prototype-survey', 'prePrototypeSurveyStarted', 'Pre-Task Survey');
+});
+
+prototypeBtn?.addEventListener('click', () => {
+    workflowState.prototypeStarted = true;
+    saveState();
+    renderWorkflow();
+
+    if (String(systemID) === '2') {
+        window.location.href = `${enhancedPrototypeUrl}/?${buildQuery()}`;
+        return;
+    }
+
     window.location.href = `/chat.html?${buildQuery()}`;
+});
+
+postSurveyBtn?.addEventListener('click', () => {
+    openSurvey('/redirect-to-post-survey', 'postSurveyStarted', 'Post-Task Survey');
 });
