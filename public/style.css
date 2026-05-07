@@ -202,6 +202,10 @@ body.workflow-page.modal-open {
   backdrop-filter: blur(6px);
 }
 
+.task-modal-backdrop[hidden] {
+  display: none;
+}
+
 .task-modal {
   width: min(100%, 760px);
 }
